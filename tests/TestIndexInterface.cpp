@@ -16,9 +16,9 @@ TEST(BasicIndexInterfaceTest, Query) {
 }
 
 TEST(BasicIndexInterfaceTest, Documents) {
-    doc_t doc1{"a.com", 5, 1231, 0.4, 0.5, std::vector<std::string>{"b.com", "c.com"}};
-    doc_t doc2{"b.com", 2, 20, 1.2, 1.3, std::vector<std::string>{"a.com"}};
-    doc_t doc3{"c.com", 100, 5, 0.0, 0.2, std::vector<std::string>{"b.com", "a.com"}};
+    doc_t doc1{"a.com", 5, 1231, 2, 0.4, 0.5};
+    doc_t doc2{"b.com", 2, 20, 1, 1.2, 1.3};
+    doc_t doc3{"c.com", 100, 5, 2, 0.0, 0.2};
     std::vector<doc_t> documents = {doc1, doc2, doc3};
 
     IndexMessage docMessage =
@@ -34,7 +34,7 @@ TEST(BasicIndexInterfaceTest, Documents) {
         EXPECT_EQ(decoded.documents[i].numTitleWords, docMessage.documents[i].numTitleWords);
         EXPECT_EQ(decoded.documents[i].pageRank, docMessage.documents[i].pageRank);
         EXPECT_EQ(decoded.documents[i].cheiRank, docMessage.documents[i].cheiRank);
-        EXPECT_EQ(decoded.documents[i].outLinks, docMessage.documents[i].outLinks);
+        EXPECT_EQ(decoded.documents[i].numOutLinks, docMessage.documents[i].numOutLinks);
     }
 
 }TEST(BasicIndexInterfaceTest, EmptyQuery) {
@@ -54,19 +54,9 @@ TEST(BasicIndexInterfaceTest, EmptyDocumentsList) {
     EXPECT_TRUE(decoded.documents.empty());
 }
 
-TEST(BasicIndexInterfaceTest, DocumentWithEmptyOutlinks) {
-    doc_t doc{"x.com", 10, 3, 0.9, 1.1, {}};
-    IndexMessage msg = IndexMessage{IndexMessageType::DOCUMENTS, "", {doc}};
-    std::string encoded = IndexInterface::Encode(msg);
-    IndexMessage decoded = IndexInterface::Decode(encoded);
-
-    ASSERT_EQ(decoded.documents.size(), 1);
-    EXPECT_EQ(decoded.documents[0].url, "x.com");
-    EXPECT_TRUE(decoded.documents[0].outLinks.empty());
-}
 
 TEST(BasicIndexInterfaceTest, FloatingPointPrecision) {
-    doc_t doc{"float.com", 5, 2, 0.123456, 0.654321, {"link.com"}};
+    doc_t doc{"float.com", 5, 2, 4, 0.123456, 0.654321};
     IndexMessage msg = IndexMessage{IndexMessageType::DOCUMENTS, "", {doc}};
     std::string encoded = IndexInterface::Encode(msg);
     IndexMessage decoded = IndexInterface::Decode(encoded);
@@ -77,7 +67,7 @@ TEST(BasicIndexInterfaceTest, FloatingPointPrecision) {
 }
 
 TEST(BasicIndexInterfaceTest, RoundTripMixedMessage) {
-    doc_t doc{"mixed.com", 42, 10, 0.123, 0.321, {"a.com", "b.com"}};
+    doc_t doc{"mixed.com", 42, 10, 2, 0.123, 0.321};
     IndexMessage original = IndexMessage{IndexMessageType::DOCUMENTS, "", {doc}};
     std::string encoded = IndexInterface::Encode(original);
     IndexMessage decoded = IndexInterface::Decode(encoded);
@@ -86,7 +76,7 @@ TEST(BasicIndexInterfaceTest, RoundTripMixedMessage) {
     EXPECT_EQ(decoded.query, "");
     ASSERT_EQ(decoded.documents.size(), 1);
     EXPECT_EQ(decoded.documents[0].url, "mixed.com");
-    EXPECT_EQ(decoded.documents[0].outLinks, std::vector<std::string>({"a.com", "b.com"}));
+    EXPECT_EQ(decoded.documents[0].numOutLinks, 2);
 }
 
 

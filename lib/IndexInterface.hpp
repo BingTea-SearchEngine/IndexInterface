@@ -20,23 +20,18 @@ struct doc_t {
     std::string url;
     uint32_t numWords;
     uint32_t numTitleWords;
+    uint32_t numOutLinks;
     float pageRank;
     float cheiRank;
-    std::vector<std::string> outLinks;
 
     friend std::ostream& operator<<(std::ostream& os, const doc_t& doc) {
         os << "{url=\"" << doc.url
            << "\", numWords=" << doc.numWords
            << ", numTitleWords=" << doc.numTitleWords
+           << ", numOutLinks=" << doc.numOutLinks
            << ", pageRank=" << doc.pageRank
            << ", cheiRank=" << doc.cheiRank
            << ", outLinks=[";
-        for (size_t i = 0; i < doc.outLinks.size(); ++i) {
-            os << "\"" << doc.outLinks[i] << "\"";
-            if (i != doc.outLinks.size() - 1) {
-                os << ", ";
-            }
-        }
         os << "]}";
         return os;
     }

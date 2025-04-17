@@ -43,20 +43,15 @@ std::string IndexInterface::Encode(IndexMessage message) {
             // num title words
             uint32_t numTitleWords = htonl(doc.numTitleWords);
             oss.write(reinterpret_cast<char*>(&numTitleWords), sizeof(numTitleWords));
+            // urls size
+            uint32_t numOutLinks = htonl(doc.numOutLinks);
+            oss.write(reinterpret_cast<char*>(&numOutLinks), sizeof(numOutLinks));
             // page rank
             uint32_t pageRank = floatToNetwork(doc.pageRank);
             oss.write(reinterpret_cast<char*>(&pageRank), sizeof(pageRank));
             // chei rank
             uint32_t cheiRank = floatToNetwork(doc.cheiRank);
             oss.write(reinterpret_cast<char*>(&cheiRank), sizeof(cheiRank));
-            // urls size
-            uint32_t size = htonl(static_cast<uint32_t>(doc.outLinks.size()));
-            oss.write(reinterpret_cast<char*>(&size), sizeof(size));
-            for (const std::string& outLink : doc.outLinks) {
-                uint32_t len = htonl(static_cast<uint32_t>(outLink.size()));
-                oss.write(reinterpret_cast<char*>(&len), sizeof(len));
-                oss.write(outLink.data(), outLink.size());
-            }
         }
 
     } else {
@@ -112,6 +107,12 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             uint32_t numTitleWords;
             iss.read(reinterpret_cast<char*>(&numTitleWords), sizeof(numTitleWords));
             numTitleWords = ntohl(numTitleWords);
+            // num out links
+            uint32_t numOutLinks;
+            iss.read(reinterpret_cast<char*>(&numOutLinks), sizeof(numOutLinks));
+            numOutLinks = ntohl(numOutLinks);
+            std::vector<std::string> outLinks;
+            outLinks.reserve(numOutLinks);
             // page rank
             uint32_t pageRankInt;
             iss.read(reinterpret_cast<char*>(&pageRankInt), sizeof(pageRankInt));
@@ -121,21 +122,8 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             iss.read(reinterpret_cast<char*>(&cheiRankInt), sizeof(cheiRankInt));
             float cheiRank = networkToFloat(cheiRankInt);
 
-            uint32_t numOutLinks;
-            iss.read(reinterpret_cast<char*>(&numOutLinks), sizeof(numOutLinks));
-            numOutLinks = ntohl(numOutLinks);
-            std::vector<std::string> outLinks;
-            outLinks.reserve(numOutLinks);
-            for (int i = 0; i < numOutLinks; ++i) {
-                uint32_t lenUrl;
-                iss.read(reinterpret_cast<char*>(&lenUrl), sizeof(lenUrl));
-                lenUrl = ntohl(lenUrl);
-                std::string outLink(lenUrl, '\0');
-                iss.read(&outLink[0], lenUrl);
-                outLinks.push_back(outLink);
-            }
 
-            message.documents.push_back(doc_t{url, numWords, numTitleWords, pageRank, cheiRank, outLinks});
+            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank});
         }
     }
     return message;
