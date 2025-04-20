@@ -52,6 +52,10 @@ std::string IndexInterface::Encode(IndexMessage message) {
             // chei rank
             uint32_t cheiRank = floatToNetwork(doc.cheiRank);
             oss.write(reinterpret_cast<char*>(&cheiRank), sizeof(cheiRank));
+
+            uint32_t snippetLen = htonl(static_cast<uint32_t>(doc.snippet.size()));
+            oss.write(reinterpret_cast<char*>(&snippetLen), sizeof(snippetLen));
+            oss.write(doc.snippet.data(), doc.snippet.size());
         }
 
     } else {
@@ -122,8 +126,13 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             iss.read(reinterpret_cast<char*>(&cheiRankInt), sizeof(cheiRankInt));
             float cheiRank = networkToFloat(cheiRankInt);
 
+            uint32_t snippetLen;
+            iss.read(reinterpret_cast<char*>(&snippetLen), sizeof(snippetLen));
+            snippetLen = ntohl(snippetLen);
+            std::string snippet(snippetLen, '\0');
+            iss.read(&snippet[0], snippetLen);
 
-            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank});
+            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank, snippet});
         }
     }
     return message;

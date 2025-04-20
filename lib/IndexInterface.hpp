@@ -24,6 +24,7 @@ struct doc_t {
     uint32_t numOutLinks;
     float pageRank;
     float cheiRank;
+    std::string snippet;
 
     friend std::ostream& operator<<(std::ostream& os, const doc_t& doc) {
         os << "{url=\"" << doc.url
@@ -32,8 +33,8 @@ struct doc_t {
            << ", numOutLinks=" << doc.numOutLinks
            << ", pageRank=" << doc.pageRank
            << ", cheiRank=" << doc.cheiRank
-           << ", outLinks=[";
-        os << "]}";
+           << ", outLinks=" << doc.snippet;
+        os << "}";
         return os;
     }
 

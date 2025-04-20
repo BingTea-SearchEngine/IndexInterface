@@ -16,9 +16,9 @@ TEST(BasicIndexInterfaceTest, Query) {
 }
 
 TEST(BasicIndexInterfaceTest, Documents) {
-    doc_t doc1{"a.com", 5, 1231, 2, 0.4, 0.5};
-    doc_t doc2{"b.com", 2, 20, 1, 1.2, 1.3};
-    doc_t doc3{"c.com", 100, 5, 2, 0.0, 0.2};
+    doc_t doc1{"a.com", 5, 1231, 2, 0.4, 0.5, "Hi this is an example snippet"};
+    doc_t doc2{"b.com", 2, 20, 1, 1.2, 1.3, "This is snippet 2"};
+    doc_t doc3{"c.com", 100, 5, 2, 0.0, 0.2, "sdfasdfasdfsafsdfdf"};
     std::vector<doc_t> documents = {doc1, doc2, doc3};
 
     IndexMessage docMessage =
@@ -35,6 +35,7 @@ TEST(BasicIndexInterfaceTest, Documents) {
         EXPECT_EQ(decoded.documents[i].pageRank, docMessage.documents[i].pageRank);
         EXPECT_EQ(decoded.documents[i].cheiRank, docMessage.documents[i].cheiRank);
         EXPECT_EQ(decoded.documents[i].numOutLinks, docMessage.documents[i].numOutLinks);
+        EXPECT_EQ(decoded.documents[i].snippet, docMessage.documents[i].snippet);
     }
 
 }TEST(BasicIndexInterfaceTest, EmptyQuery) {
@@ -67,7 +68,7 @@ TEST(BasicIndexInterfaceTest, FloatingPointPrecision) {
 }
 
 TEST(BasicIndexInterfaceTest, RoundTripMixedMessage) {
-    doc_t doc{"mixed.com", 42, 10, 2, 0.123, 0.321};
+    doc_t doc{"mixed.com", 42, 10, 2, 0.123, 0.321, "asdfasdfs asdfasdf  dsakkjdlasdfasd fda"};
     IndexMessage original = IndexMessage{IndexMessageType::DOCUMENTS, "", {doc}};
     std::string encoded = IndexInterface::Encode(original);
     IndexMessage decoded = IndexInterface::Decode(encoded);
@@ -77,6 +78,7 @@ TEST(BasicIndexInterfaceTest, RoundTripMixedMessage) {
     ASSERT_EQ(decoded.documents.size(), 1);
     EXPECT_EQ(decoded.documents[0].url, "mixed.com");
     EXPECT_EQ(decoded.documents[0].numOutLinks, 2);
+    EXPECT_EQ(decoded.documents[0].snippet, doc.snippet);
 }
 
 
