@@ -25,6 +25,7 @@ struct doc_t {
     float pageRank;
     float cheiRank;
     std::string snippet;
+    std::string title;
 
     friend std::ostream& operator<<(std::ostream& os, const doc_t& doc) {
         os << "{url=\"" << doc.url
@@ -33,12 +34,14 @@ struct doc_t {
            << ", numOutLinks=" << doc.numOutLinks
            << ", pageRank=" << doc.pageRank
            << ", cheiRank=" << doc.cheiRank
-           << ", outLinks=" << doc.snippet;
+           << ", snippet=" << doc.snippet
+           << ", title=" << doc.title;
         os << "}";
         return os;
     }
 
 };
+bool operator==(const doc_t& lhs, const doc_t& rhs);
 
 struct IndexMessage {
     IndexMessageType type;

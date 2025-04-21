@@ -16,9 +16,9 @@ TEST(BasicIndexInterfaceTest, Query) {
 }
 
 TEST(BasicIndexInterfaceTest, Documents) {
-    doc_t doc1{"a.com", 5, 1231, 2, 0.4, 0.5, "Hi this is an example snippet"};
-    doc_t doc2{"b.com", 2, 20, 1, 1.2, 1.3, "This is snippet 2"};
-    doc_t doc3{"c.com", 100, 5, 2, 0.0, 0.2, "sdfasdfasdfsafsdfdf"};
+    doc_t doc1{"a.com", 5, 1231, 2, 0.4, 0.5, "Hi this is an example snippet", "ABC NEWS"};
+    doc_t doc2{"b.com", 2, 20, 1, 1.2, 1.3, "This is snippet 2", "SDFDSF "};
+    doc_t doc3{"c.com", 100, 5, 2, 0.0, 0.2, "sdfasdfasdfsafsdfdf", "SDFSss"};
     std::vector<doc_t> documents = {doc1, doc2, doc3};
 
     IndexMessage docMessage =
@@ -29,13 +29,8 @@ TEST(BasicIndexInterfaceTest, Documents) {
     EXPECT_EQ(decoded.type, docMessage.type);
     EXPECT_EQ(decoded.documents.size(), docMessage.documents.size());
     for (size_t i = 0; i < decoded.documents.size(); ++i) {
-        EXPECT_EQ(decoded.documents[i].url, docMessage.documents[i].url);
-        EXPECT_EQ(decoded.documents[i].numWords, docMessage.documents[i].numWords);
-        EXPECT_EQ(decoded.documents[i].numTitleWords, docMessage.documents[i].numTitleWords);
-        EXPECT_EQ(decoded.documents[i].pageRank, docMessage.documents[i].pageRank);
-        EXPECT_EQ(decoded.documents[i].cheiRank, docMessage.documents[i].cheiRank);
-        EXPECT_EQ(decoded.documents[i].numOutLinks, docMessage.documents[i].numOutLinks);
-        EXPECT_EQ(decoded.documents[i].snippet, docMessage.documents[i].snippet);
+        EXPECT_EQ(decoded.documents[i], docMessage.documents[i]);
+        cout << decoded.documents[i] << endl;
     }
 
 }TEST(BasicIndexInterfaceTest, EmptyQuery) {

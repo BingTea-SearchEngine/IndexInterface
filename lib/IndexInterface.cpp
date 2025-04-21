@@ -56,6 +56,10 @@ std::string IndexInterface::Encode(IndexMessage message) {
             uint32_t snippetLen = htonl(static_cast<uint32_t>(doc.snippet.size()));
             oss.write(reinterpret_cast<char*>(&snippetLen), sizeof(snippetLen));
             oss.write(doc.snippet.data(), doc.snippet.size());
+
+            uint32_t titleLen = htonl(static_cast<uint32_t>(doc.title.size()));
+            oss.write(reinterpret_cast<char*>(&titleLen), sizeof(titleLen));
+            oss.write(doc.title.data(), doc.title.size());
         }
 
     } else {
@@ -132,9 +136,25 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             std::string snippet(snippetLen, '\0');
             iss.read(&snippet[0], snippetLen);
 
-            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank, snippet});
+            uint32_t titleLen;
+            iss.read(reinterpret_cast<char*>(&titleLen), sizeof(titleLen));
+            titleLen = ntohl(titleLen);
+            std::string title(titleLen, '\0');
+            iss.read(&title[0], titleLen);
+
+            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank, snippet, title});
         }
     }
     return message;
 }
 
+bool operator==(const doc_t& lhs, const doc_t& rhs) {
+    return lhs.url == rhs.url &&
+           lhs.numWords == rhs.numWords &&
+           lhs.numTitleWords == rhs.numTitleWords &&
+           lhs.numOutLinks == rhs.numOutLinks &&
+           lhs.pageRank == rhs.pageRank &&
+           lhs.cheiRank == rhs.cheiRank &&
+           lhs.snippet == rhs.snippet &&
+           lhs.title == rhs.title;
+}
