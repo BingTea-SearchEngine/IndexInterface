@@ -22,8 +22,11 @@ struct doc_t {
     uint32_t numWords;
     uint32_t numTitleWords;
     uint32_t numOutLinks;
+    uint32_t numTitleMatch;
+    uint32_t numBodyMatch;
     float pageRank;
     float cheiRank;
+    float rankingScore;
     std::string snippet;
     std::string title;
 
@@ -32,8 +35,11 @@ struct doc_t {
            << "\", numWords=" << doc.numWords
            << ", numTitleWords=" << doc.numTitleWords
            << ", numOutLinks=" << doc.numOutLinks
+           << ", numTitleMatch=" << doc.numTitleMatch
+           << ", numBodyMatch=" << doc.numBodyMatch
            << ", pageRank=" << doc.pageRank
            << ", cheiRank=" << doc.cheiRank
+           << ", cheiRank=" << doc.rankingScore
            << ", snippet=" << doc.snippet
            << ", title=" << doc.title;
         os << "}";

@@ -29,7 +29,8 @@ std::string IndexInterface::Encode(IndexMessage message) {
         oss.write(message.query.data(), message.query.size());
 
     } else if (message.type == IndexMessageType::DOCUMENTS) {
-        uint32_t numUrls = htonl(static_cast<uint32_t>(message.documents.size()));
+        uint32_t numUrls =
+            htonl(static_cast<uint32_t>(message.documents.size()));
         oss.write(reinterpret_cast<char*>(&numUrls), sizeof(numUrls));
 
         for (const doc_t& doc : message.documents) {
@@ -42,18 +43,32 @@ std::string IndexInterface::Encode(IndexMessage message) {
             oss.write(reinterpret_cast<char*>(&numWords), sizeof(numWords));
             // num title words
             uint32_t numTitleWords = htonl(doc.numTitleWords);
-            oss.write(reinterpret_cast<char*>(&numTitleWords), sizeof(numTitleWords));
+            oss.write(reinterpret_cast<char*>(&numTitleWords),
+                      sizeof(numTitleWords));
             // urls size
             uint32_t numOutLinks = htonl(doc.numOutLinks);
-            oss.write(reinterpret_cast<char*>(&numOutLinks), sizeof(numOutLinks));
+            oss.write(reinterpret_cast<char*>(&numOutLinks),
+                      sizeof(numOutLinks));
+            // num title match
+            uint32_t numTitleMatch = htonl(doc.numTitleMatch);
+            oss.write(reinterpret_cast<char*>(&numTitleMatch),
+                      sizeof(numTitleMatch));
+            // num title match
+            uint32_t numBodyMatch = htonl(doc.numBodyMatch);
+            oss.write(reinterpret_cast<char*>(&numBodyMatch),
+                      sizeof(numBodyMatch));
             // page rank
             uint32_t pageRank = floatToNetwork(doc.pageRank);
             oss.write(reinterpret_cast<char*>(&pageRank), sizeof(pageRank));
             // chei rank
             uint32_t cheiRank = floatToNetwork(doc.cheiRank);
             oss.write(reinterpret_cast<char*>(&cheiRank), sizeof(cheiRank));
+            // rank
+            uint32_t score = floatToNetwork(doc.rankingScore);
+            oss.write(reinterpret_cast<char*>(&score), sizeof(score));
 
-            uint32_t snippetLen = htonl(static_cast<uint32_t>(doc.snippet.size()));
+            uint32_t snippetLen =
+                htonl(static_cast<uint32_t>(doc.snippet.size()));
             oss.write(reinterpret_cast<char*>(&snippetLen), sizeof(snippetLen));
             oss.write(doc.snippet.data(), doc.snippet.size());
 
@@ -113,22 +128,38 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             numWords = ntohl(numWords);
             // num title words
             uint32_t numTitleWords;
-            iss.read(reinterpret_cast<char*>(&numTitleWords), sizeof(numTitleWords));
+            iss.read(reinterpret_cast<char*>(&numTitleWords),
+                     sizeof(numTitleWords));
             numTitleWords = ntohl(numTitleWords);
             // num out links
             uint32_t numOutLinks;
-            iss.read(reinterpret_cast<char*>(&numOutLinks), sizeof(numOutLinks));
+            iss.read(reinterpret_cast<char*>(&numOutLinks),
+                     sizeof(numOutLinks));
             numOutLinks = ntohl(numOutLinks);
-            std::vector<std::string> outLinks;
-            outLinks.reserve(numOutLinks);
+            // num title match
+            uint32_t numTitleMatch;
+            iss.read(reinterpret_cast<char*>(&numTitleMatch),
+                     sizeof(numTitleMatch));
+            numTitleMatch = ntohl(numTitleMatch);
+            // num body match
+            uint32_t numBodyMatch;
+            iss.read(reinterpret_cast<char*>(&numBodyMatch),
+                     sizeof(numBodyMatch));
+            numBodyMatch = ntohl(numBodyMatch);
             // page rank
             uint32_t pageRankInt;
-            iss.read(reinterpret_cast<char*>(&pageRankInt), sizeof(pageRankInt));
+            iss.read(reinterpret_cast<char*>(&pageRankInt),
+                     sizeof(pageRankInt));
             float pageRank = networkToFloat(pageRankInt);
             // chei rank
             uint32_t cheiRankInt;
-            iss.read(reinterpret_cast<char*>(&cheiRankInt), sizeof(cheiRankInt));
+            iss.read(reinterpret_cast<char*>(&cheiRankInt),
+                     sizeof(cheiRankInt));
             float cheiRank = networkToFloat(cheiRankInt);
+            //
+            uint32_t rankInt;
+            iss.read(reinterpret_cast<char*>(&rankInt), sizeof(rankInt));
+            float rank = networkToFloat(rankInt);
 
             uint32_t snippetLen;
             iss.read(reinterpret_cast<char*>(&snippetLen), sizeof(snippetLen));
@@ -142,19 +173,18 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             std::string title(titleLen, '\0');
             iss.read(&title[0], titleLen);
 
-            message.documents.push_back(doc_t{url, numWords, numTitleWords, numOutLinks, pageRank, cheiRank, snippet, title});
+            message.documents.push_back(
+                doc_t{url, numWords, numTitleWords, numOutLinks, numTitleMatch,
+                      numBodyMatch, pageRank, cheiRank, rank, snippet, title});
         }
     }
     return message;
 }
 
 bool operator==(const doc_t& lhs, const doc_t& rhs) {
-    return lhs.url == rhs.url &&
-           lhs.numWords == rhs.numWords &&
+    return lhs.url == rhs.url && lhs.numWords == rhs.numWords &&
            lhs.numTitleWords == rhs.numTitleWords &&
-           lhs.numOutLinks == rhs.numOutLinks &&
-           lhs.pageRank == rhs.pageRank &&
-           lhs.cheiRank == rhs.cheiRank &&
-           lhs.snippet == rhs.snippet &&
+           lhs.numOutLinks == rhs.numOutLinks && lhs.pageRank == rhs.pageRank &&
+           lhs.cheiRank == rhs.cheiRank && lhs.snippet == rhs.snippet &&
            lhs.title == rhs.title;
 }
