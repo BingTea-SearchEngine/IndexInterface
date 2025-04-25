@@ -63,6 +63,13 @@ std::string IndexInterface::Encode(IndexMessage message) {
             // chei rank
             uint32_t cheiRank = floatToNetwork(doc.cheiRank);
             oss.write(reinterpret_cast<char*>(&cheiRank), sizeof(cheiRank));
+            // community
+            int community = htonl(doc.community);
+            oss.write(reinterpret_cast<char*>(&community), sizeof(community));
+            // community
+            int communityCount = htonl(doc.communityCount);
+            oss.write(reinterpret_cast<char*>(&communityCount),
+                      sizeof(communityCount));
             // rank
             uint32_t score = floatToNetwork(doc.rankingScore);
             oss.write(reinterpret_cast<char*>(&score), sizeof(score));
@@ -156,6 +163,15 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
             iss.read(reinterpret_cast<char*>(&cheiRankInt),
                      sizeof(cheiRankInt));
             float cheiRank = networkToFloat(cheiRankInt);
+            // community
+            int community;
+            iss.read(reinterpret_cast<char*>(&community), sizeof(community));
+            community = ntohl(community);
+            // community count
+            int communityCount;
+            iss.read(reinterpret_cast<char*>(&communityCount),
+                     sizeof(communityCount));
+            communityCount = ntohl(communityCount);
             //
             uint32_t rankInt;
             iss.read(reinterpret_cast<char*>(&rankInt), sizeof(rankInt));
@@ -175,7 +191,8 @@ IndexMessage IndexInterface::Decode(const std::string& encoded) {
 
             message.documents.push_back(
                 doc_t{url, numWords, numTitleWords, numOutLinks, numTitleMatch,
-                      numBodyMatch, pageRank, cheiRank, rank, snippet, title});
+                      numBodyMatch, pageRank, cheiRank, community,
+                      communityCount, rank, snippet, title});
         }
     }
     return message;
@@ -185,6 +202,7 @@ bool operator==(const doc_t& lhs, const doc_t& rhs) {
     return lhs.url == rhs.url && lhs.numWords == rhs.numWords &&
            lhs.numTitleWords == rhs.numTitleWords &&
            lhs.numOutLinks == rhs.numOutLinks && lhs.pageRank == rhs.pageRank &&
-           lhs.cheiRank == rhs.cheiRank && lhs.snippet == rhs.snippet &&
-           lhs.title == rhs.title;
+           lhs.cheiRank == rhs.cheiRank && lhs.community == rhs.community &&
+           lhs.communityCount == rhs.communityCount &&
+           lhs.snippet == rhs.snippet && lhs.title == rhs.title;
 }

@@ -26,6 +26,8 @@ struct doc_t {
     uint32_t numBodyMatch;
     float pageRank;
     float cheiRank;
+    int community;
+    int communityCount;
     float rankingScore;
     std::string snippet;
     std::string title;
@@ -39,7 +41,9 @@ struct doc_t {
            << ", numBodyMatch=" << doc.numBodyMatch
            << ", pageRank=" << doc.pageRank
            << ", cheiRank=" << doc.cheiRank
-           << ", cheiRank=" << doc.rankingScore
+           << ", community=" << doc.community
+           << ", communityCount=" << doc.communityCount
+           << ", rankingScore=" << doc.rankingScore
            << ", snippet=" << doc.snippet
            << ", title=" << doc.title;
         os << "}";
